@@ -1,0 +1,8 @@
+PS D:\Fastify_Prisma_training\ts-playground\src> npx tsc --noEmit           
+PS D:\Fastify_Prisma_training\ts-playground\src> 
+
+output
+
+PS D:\Fastify_Prisma_training\ts-playground> npx tsx src/typed-errors.ts
+Rs. 499.00
+[ 1, 2, 3 ]

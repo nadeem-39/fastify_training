@@ -1,0 +1,57 @@
+typed-errors.ts:29:5 - error TS2322: Type 'string' is not assignable to type 'number'.
+
+29   { id: "2", name: "Keyboard", pricePaise: 349900, inStock: true },
+       ~~
+
+  typed-errors.ts:20:3
+    20   id: number;
+         ~~
+    The expected type comes from property 'id' which is declared here on type 'Product'
+
+typed-errors.ts:35:3 - error TS2322: Type 'Product | undefined' is not assignable to type 'Product'.
+  Type 'undefined' is not assignable to type 'Product'.
+
+35   return products.find((p) => p.id === id);
+     ~~~~~~
+
+typed-errors.ts:42:25 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+
+42 console.log(formatPrice("49900"));
+                           ~~~~~~~
+
+typed-errors.ts:45:44 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: Product, index: number, array: Product[]) => value is Product, thisArg?: any): Product[]', gave the following error.
+    Argument of type '(p: string) => any' is not assignable to parameter of type '(value: Product, index: number, array: Product[]) => value is Product'.
+      Types of parameters 'p' and 'value' are incompatible.
+        Type 'Product' is not assignable to type 'string'.
+  Overload 2 of 2, '(predicate: (value: Product, index: number, array: Product[]) => unknown, thisArg?: any): Product[]', gave the following error.
+    Argument of type '(p: string) => any' is not assignable to parameter of type '(value: Product, index: number, array: Product[]) => unknown'.
+      Types of parameters 'p' and 'value' are incompatible.
+        Type 'Product' is not assignable to type 'string'.
+
+45 const inStock: Product[] = products.filter((p: string) => p.inStock);
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+typed-errors.ts:45:61 - error TS2339: Property 'inStock' does not exist on type 'string'.
+
+45 const inStock: Product[] = products.filter((p: string) => p.inStock);
+                                                               ~~~~~~~
+
+typed-errors.ts:48:7 - error TS2741: Property 'inStock' is missing in type '{ id: number; name: string; pricePaise: number; }' but required in type 'Product'.
+
+48 const newProduct: Product = {
+         ~~~~~~~~~~
+
+  typed-errors.ts:23:3
+    23   inStock: boolean;
+         ~~~~~~~
+    'inStock' is declared here.
+
+typed-errors.ts:56:35 - error TS2339: Property 'id' does not exist on type 'T'.
+
+56   return items.map((item) => item.id);
+                                     ~~
+
+
+Found 7 errors in the same file, starting at: typed-errors.ts:29
