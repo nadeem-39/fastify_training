@@ -20,3 +20,19 @@ model Book {
   createdAt  DateTime @default(now()) @db.DateTime(3)
   updatedAt  DateTime @updatedAt @db.DateTime(3)
 }
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+model User {
+id          Int        @id @default(autoincrement())
+name        String     @db.VarChar(100)
+email       String     @db.VarChar(255) @unique
+password    String     @db.VarChar(100)
+role        Role       @default(STUDENT)
+createdAt  DateTime @default(now()) @db.DateTime(3)
+}
+
+// run after creating the table npx prisma migrate dev --name add_user_table

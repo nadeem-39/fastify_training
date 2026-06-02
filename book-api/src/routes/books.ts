@@ -10,10 +10,15 @@ import {
 } from "../controllers/books.js";
 
 export const booksRoutes: FastifyPluginAsync = async (app) => {
-  app.get("/", { schema: { querystring: listBooksQuery } }, getBooks);
+  app.get(
+    "/",
+    { preHandler: [app.authenticate], schema: { querystring: listBooksQuery } },
+    getBooks,
+  );
   app.get(
     "/:id",
     {
+      preHandler: [app.authenticate],
       schema: {
         params: bookIdSchema,
       },
@@ -23,6 +28,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
   app.post(
     "/",
     {
+      preHandler: [app.authenticate],
       schema: {
         body: createBookSchema,
       },
@@ -32,6 +38,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
   app.put(
     "/:id",
     {
+      preHandler: [app.authenticate],
       schema: {
         params: bookIdSchema,
         body: createBookSchema,
@@ -42,6 +49,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
   app.delete(
     "/:id",
     {
+      preHandler: [app.authenticate],
       schema: {
         params: bookIdSchema,
       },

@@ -13,6 +13,7 @@ const envSchema = z.object({
   DATABASE_NAME: z.string(),
   DATABASE_HOST: z.string(),
   DATABASE_PORT: z.coerce.number().default(3306),
+  JWT_SECRET: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

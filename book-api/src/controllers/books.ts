@@ -54,7 +54,9 @@ export async function getBooks(req: FastifyRequest, reply: FastifyReply) {
     return reply.status(400).send({
       data: {
         success: false,
-        message: err.meta.driverAdapterError.cause.originalMessage,
+        message:
+          err?.meta?.driverAdapterError?.cause?.originalMessage ||
+          "Something went wrong could not get",
       },
     });
   }
@@ -81,7 +83,9 @@ export async function getBookById(req: FastifyRequest, reply: FastifyReply) {
     return reply.status(400).send({
       data: {
         success: false,
-        message: err.meta.driverAdapterError.cause.originalMessage,
+        message:
+          err?.meta?.driverAdapterError?.cause?.originalMessage ||
+          "Something went wrong could not get",
       },
     });
   }
@@ -99,7 +103,7 @@ export async function addBook(req: FastifyRequest, reply: FastifyReply) {
         bookId: data.id,
         authorName: data.authorName,
       },
-      "book created",
+      "Book created",
     );
 
     return reply.status(201).send({
@@ -114,7 +118,9 @@ export async function addBook(req: FastifyRequest, reply: FastifyReply) {
     return reply.status(400).send({
       data: {
         success: false,
-        message: err.meta.driverAdapterError.cause.originalMessage,
+        message:
+          err?.meta?.driverAdapterError?.cause?.originalMessage ||
+          "Something went wrong could not add",
       },
     });
   }
@@ -132,11 +138,11 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
       data: bookInfo,
     });
 
-    return reply.status(201).send({
+    return reply.status(200).send({
       data: {
         success: true,
         data,
-        message: "edit Successfully",
+        message: "Edit Successfully",
       },
     });
   } catch (error: unknown) {
@@ -144,7 +150,9 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
     return reply.status(400).send({
       data: {
         success: false,
-        message: err.meta.driverAdapterError.cause.originalMessage,
+        message:
+          err?.meta?.driverAdapterError?.cause?.originalMessage ||
+          "Something went wrong could not edit",
       },
     });
   }
@@ -163,14 +171,17 @@ export async function deleteBookById(req: FastifyRequest, reply: FastifyReply) {
       data: {
         success: true,
         data: book,
-        message: "delete successfully",
+        message: "Delete successfully",
       },
     });
   } catch (error: unknown) {
+    const err = error as dbErrorType;
     return reply.status(400).send({
       data: {
         success: false,
-        message: "Book Id is not found",
+        message:
+          err?.meta?.driverAdapterError?.cause?.originalMessage ||
+          "Something went wrong could not delete",
       },
     });
   }

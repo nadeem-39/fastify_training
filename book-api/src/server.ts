@@ -25,8 +25,11 @@ import {
   validatorCompiler,
   serializerCompiler,
 } from "fastify-type-provider-zod";
+import multipart from "@fastify/multipart";
+import fastifyJwt from "@fastify/jwt";
 
 import { booksRoutes } from "./routes/books.js";
+import { authRoutes } from "./routes/auth.js";
 
 // cors for browser
 await app.register(cors, {
@@ -34,15 +37,36 @@ await app.register(cors, {
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 });
 
+// adding form data parser
+await app.register(multipart, { attachFieldsToBody: true });
+
 // setting zod with fastify
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
+
+// adding jwt token
+await app.register(fastifyJwt, { secret: env.JWT_SECRET });
+
+// adding custom authenticate function
+app.decorate(
+  "authenticate",
+  async (req: Fastify.FastifyRequest, reply: Fastify.FastifyReply) => {
+    try {
+      await req.jwtVerify();
+    } catch {
+      reply.code(401).send({ success: false, message: "Unauthorized access" });
+    }
+  },
+);
 
 // checking health
 app.get("/health", async () => ({ status: "ok" }));
 
 // book routes
 app.register(booksRoutes, { prefix: "/books" });
+
+//auth routes
+app.register(authRoutes, { prefix: "/login" });
 
 // error handler
 app.setErrorHandler((err: any, req, reply) => {
@@ -55,3 +79,5 @@ app.setErrorHandler((err: any, req, reply) => {
 
 // listing port
 app.listen({ port: env.PORT });
+
+export default app;
