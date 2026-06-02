@@ -44,6 +44,8 @@ async function main(): Promise<void> {
     return row as unknown as EmployeeRow;
   });
 
+  console.log(rows);
+
   const itProg = rows.filter((r) => r.JOB_ID === "IT_PROG");
 
   // Write back as CSV (header + filtered rows).

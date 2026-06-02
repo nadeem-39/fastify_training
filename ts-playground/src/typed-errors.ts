@@ -55,7 +55,7 @@ const newProduct: Product = {
 
 // ERROR 6: generic constraint is missing, so `T['id']` is not allowed.
 function pickIds<T extends { id: number }>(items: T[]): number[] {
-  // we can bind the id with the help of etends keyword
+  // we can bind the id with the help of extends keyword
   return items.map((item) => item.id);
 }
 console.log(pickIds(products));
