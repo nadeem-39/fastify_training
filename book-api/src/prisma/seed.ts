@@ -13,107 +13,95 @@
  */
 
 import { prisma } from "../lib/prisma.js";
-import { Role } from "../generated/prisma/enums.js";
 
-const books = [
-  { bookName: "C", authorName: "Naman Bhardwaj", isbn: "2223334000" },
-  { bookName: "C++", authorName: "Vishal Kumar", isbn: "2201229000" },
-  { bookName: "Java", authorName: "Vinod", isbn: "2211259000" },
-  { bookName: "Electronic", authorName: "Sumit Kadyan", isbn: "2221234000" },
-  { bookName: "C#", authorName: "Smriti Devi", isbn: "2210029000" },
-  { bookName: "Java-advance", authorName: "Anil Mittal", isbn: "2211329000" },
-  { bookName: "Javascript", authorName: "Smriti Devi", isbn: "2210329000" },
-  { bookName: "c#", authorName: "Manish Goel", isbn: "2210029001" },
-  { bookName: "Electronic-3", authorName: "Sapna Devi", isbn: "2201329000" },
-  { bookName: "Electronic-2", authorName: "Kumari Devi", isbn: "2211325000" },
-];
+async function main() {
+  // Books
+  await prisma.book.createMany({
+    data: [
+      {
+        bookName: "Clean Code",
+        authorName: "Robert C. Martin",
+        isbn: "9780132350884",
+      },
+      {
+        bookName: "The Pragmatic Programmer",
+        authorName: "Andrew Hunt",
+        isbn: "9780201616224",
+      },
+      {
+        bookName: "Design Patterns",
+        authorName: "Erich Gamma",
+        isbn: "9780201633610",
+      },
+      {
+        bookName: "Refactoring",
+        authorName: "Martin Fowler",
+        isbn: "9780201485677",
+      },
+      {
+        bookName: "JavaScript: The Good Parts",
+        authorName: "Douglas Crockford",
+        isbn: "9780596517748",
+      },
+    ],
+    skipDuplicates: true,
+  });
 
-const users = [
-  {
-    name: "Nadeem",
-    email: "nadeem@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.ADMIN,
-  },
-  {
-    name: "Aman",
-    email: "aman@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Rahul",
-    email: "rahul@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Arjun",
-    email: "arjun@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Vikas",
-    email: "vikas@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Sahil",
-    email: "sahil@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Karan",
-    email: "karan@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Rohit",
-    email: "rohit@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Deepak",
-    email: "deepak@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-  {
-    name: "Mohit",
-    email: "mohit@gmail.com",
-    password: "$2b$10$8K1p/a0hY1vD1n9M6mYQw.7n2T3n3bFzq9j7zYw3h4J2Q6wY5Xr6e",
-    role: Role.STUDENT,
-  },
-];
+  // Students
+  await prisma.student.createMany({
+    data: [
+      {
+        name: "Nadeem Siddiqui",
+        rollNo: "CS001",
+        phoneNo: "9876543210",
+        country: "India",
+        state: "Delhi",
+        city: "New Delhi",
+      },
+      {
+        name: "Aman Sharma",
+        rollNo: "CS002",
+        phoneNo: "9876543211",
+        country: "India",
+        state: "Uttar Pradesh",
+        city: "Noida",
+      },
+      {
+        name: "Priya Singh",
+        rollNo: "CS003",
+        phoneNo: "9876543212",
+        country: "India",
+        state: "Haryana",
+        city: "Gurugram",
+      },
+      {
+        name: "Rahul Verma",
+        rollNo: "CS004",
+        phoneNo: "9876543213",
+        country: "India",
+        state: "Punjab",
+        city: "Chandigarh",
+      },
+      {
+        name: "Anjali Gupta",
+        rollNo: "CS005",
+        phoneNo: "9876543214",
+        country: "India",
+        state: "Rajasthan",
+        city: "Jaipur",
+      },
+    ],
+    skipDuplicates: true,
+  });
 
-async function main(): Promise<void> {
-  for (const b of books) {
-    await prisma.book.upsert({
-      where: { isbn: b.isbn },
-      update: { bookName: b.bookName, authorName: b.authorName },
-      create: b,
-    });
-  }
-
-  for (const u of users) {
-    await prisma.user.upsert({
-      where: { email: u.email },
-      update: { name: u.name, password: u.password },
-      create: u,
-    });
-  }
-  console.log(`Seeded ${books.length} books`);
-  console.log(`Seeded ${users.length} users`);
+  console.log("✅ Seed data inserted");
 }
 
 main()
-  .catch((err) => {
-    console.error(err);
+  .catch((e) => {
+    console.error(e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

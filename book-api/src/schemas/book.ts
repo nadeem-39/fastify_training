@@ -9,15 +9,33 @@ export const bookIdSchema = z.object({
 
 export const createBookSchema = z.object({
   bookName: z
-    .string()
+    .string({ error: "Enter valid book name" })
     .min(1, "Book name is empty")
     .max(100, "Book name should be less than 100 characters"),
   authorName: z
-    .string()
+    .string({ error: "Enter valid author name" })
     .min(1, "Author name is empty")
     .max(100, "Author name should be less than 100 characters"),
-  isbn: z.string().regex(/^[0-9]{10}([0-9]{3})?$/, "Wrong ISBN"),
+  isbn: z
+    .string({ error: "Enter valid isbn" })
+    .regex(/^[0-9]{10}([0-9]{3})?$/, "Wrong ISBN"),
+  coverImage: z.string().optional(),
 });
+
+// export const updateBookSchema = z.object({
+//   bookName: z
+//     .string({ error: "Enter valid book name" })
+//     .min(1, "Book name is empty")
+//     .max(100, "Book name should be less than 100 characters"),
+//   authorName: z
+//     .string({ error: "Enter valid author name" })
+//     .min(1, "Author name is empty")
+//     .max(100, "Author name should be less than 100 characters"),
+//   isbn: z
+//     .string({ error: "Enter valid isbn" })
+//     .regex(/^[0-9]{10}([0-9]{3})?$/, "Wrong ISBN"),
+//   coverImage: z.string().optional(),
+// });
 
 export type BookIdSchema = z.infer<typeof bookIdSchema>;
 export type CreateBookSchema = z.infer<typeof createBookSchema>;

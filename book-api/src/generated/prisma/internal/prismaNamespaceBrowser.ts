@@ -52,7 +52,9 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Book: 'Book',
-  User: 'User'
+  User: 'User',
+  Student: 'Student',
+  Issue: 'Issue'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -76,6 +78,7 @@ export const BookScalarFieldEnum = {
   bookName: 'bookName',
   authorName: 'authorName',
   isbn: 'isbn',
+  coverFile: 'coverFile',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -85,14 +88,51 @@ export type BookScalarFieldEnum = (typeof BookScalarFieldEnum)[keyof typeof Book
 
 export const UserScalarFieldEnum = {
   id: 'id',
-  name: 'name',
+  firstName: 'firstName',
+  middleName: 'middleName',
+  lastName: 'lastName',
   email: 'email',
-  password: 'password',
+  username: 'username',
+  passwordHash: 'passwordHash',
   role: 'role',
-  createdAt: 'createdAt'
+  googleId: 'googleId',
+  resetToken: 'resetToken',
+  resetExpires: 'resetExpires',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const StudentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  rollNo: 'rollNo',
+  phoneNo: 'phoneNo',
+  photoFile: 'photoFile',
+  country: 'country',
+  state: 'state',
+  city: 'city',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeof StudentScalarFieldEnum]
+
+
+export const IssueScalarFieldEnum = {
+  id: 'id',
+  bookId: 'bookId',
+  studentId: 'studentId',
+  issueDate: 'issueDate',
+  returnDate: 'returnDate',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type IssueScalarFieldEnum = (typeof IssueScalarFieldEnum)[keyof typeof IssueScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -103,20 +143,48 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const BookOrderByRelevanceFieldEnum = {
   bookName: 'bookName',
   authorName: 'authorName',
-  isbn: 'isbn'
+  isbn: 'isbn',
+  coverFile: 'coverFile'
 } as const
 
 export type BookOrderByRelevanceFieldEnum = (typeof BookOrderByRelevanceFieldEnum)[keyof typeof BookOrderByRelevanceFieldEnum]
 
 
 export const UserOrderByRelevanceFieldEnum = {
-  name: 'name',
+  firstName: 'firstName',
+  middleName: 'middleName',
+  lastName: 'lastName',
   email: 'email',
-  password: 'password'
+  username: 'username',
+  passwordHash: 'passwordHash',
+  role: 'role',
+  googleId: 'googleId',
+  resetToken: 'resetToken'
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
+export const StudentOrderByRelevanceFieldEnum = {
+  name: 'name',
+  rollNo: 'rollNo',
+  phoneNo: 'phoneNo',
+  photoFile: 'photoFile',
+  country: 'country',
+  state: 'state',
+  city: 'city'
+} as const
+
+export type StudentOrderByRelevanceFieldEnum = (typeof StudentOrderByRelevanceFieldEnum)[keyof typeof StudentOrderByRelevanceFieldEnum]
 

@@ -14,6 +14,13 @@ const envSchema = z.object({
   DATABASE_HOST: z.string(),
   DATABASE_PORT: z.coerce.number().default(3306),
   JWT_SECRET: z.string(),
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_AUTH_URI: z.string(),
+  GOOGLE_TOKEN_URI: z.string(),
+  GOOGLE_AUTH_PROVIDER: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  SMTP_USER: z.email(),
+  SMTP_PASS: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

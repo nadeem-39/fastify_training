@@ -27,3 +27,13 @@ export type Book = Prisma.BookModel
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model Student
+ * 
+ */
+export type Student = Prisma.StudentModel
+/**
+ * Model Issue
+ * 
+ */
+export type Issue = Prisma.IssueModel

@@ -21,11 +21,12 @@ const app = Fastify({
     },
   },
 });
+import multipart from "@fastify/multipart";
 import {
   validatorCompiler,
   serializerCompiler,
 } from "fastify-type-provider-zod";
-import multipart from "@fastify/multipart";
+
 import fastifyJwt from "@fastify/jwt";
 
 import { booksRoutes } from "./routes/books.js";
@@ -33,12 +34,13 @@ import { authRoutes } from "./routes/auth.js";
 
 // cors for browser
 await app.register(cors, {
-  origin: "http://localhost:5173",
+  origin: ["http://127.0.0.1:5173", "http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  // credentials: true,
 });
 
 // adding form data parser
-await app.register(multipart, { attachFieldsToBody: true });
+await app.register(multipart, { limits: { fileSize: 2 * 1024 * 1024 } });
 
 // setting zod with fastify
 app.setValidatorCompiler(validatorCompiler);
@@ -66,7 +68,7 @@ app.get("/health", async () => ({ status: "ok" }));
 app.register(booksRoutes, { prefix: "/books" });
 
 //auth routes
-app.register(authRoutes, { prefix: "/login" });
+app.register(authRoutes, { prefix: "/auth" });
 
 // error handler
 app.setErrorHandler((err: any, req, reply) => {
