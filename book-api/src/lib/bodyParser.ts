@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply, HookHandlerDoneFunction } from "fastify";
 
-export const bodyParser = async (
+export const bodyParser = (
   req: FastifyRequest,
   reply: FastifyReply,
   done: HookHandlerDoneFunction,

@@ -1,7 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { bookIdSchema, createBookSchema } from "../schemas/book.js";
 import { paginationQuery } from "../schemas/query.js";
-import { bodyParser } from "../lib/bodyParser.js";
+
 import {
   getBooks,
   getBookById,
@@ -9,7 +9,12 @@ import {
   editBook,
   deleteBookById,
   getBookImage,
+  exportBooksExel,
+  exportBooksCsv,
+  exportBookPdf,
+  addBookBulk,
 } from "../controllers/books.js";
+import { authorize } from "../lib/authorization.js";
 
 export const booksRoutes: FastifyPluginAsync = async (app) => {
   app.get(
@@ -19,6 +24,22 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
       schema: { querystring: paginationQuery },
     },
     getBooks,
+  );
+  app.get(
+    "/export.xlsx",
+    {
+      preHandler: [app.authenticate],
+      schema: { querystring: paginationQuery },
+    },
+    exportBooksExel,
+  );
+  app.get(
+    "/export.csv",
+    {
+      preHandler: [app.authenticate],
+      schema: { querystring: paginationQuery },
+    },
+    exportBooksCsv,
   );
   app.get(
     "/:id",
@@ -31,9 +52,20 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
     getBookById,
   );
   app.get(
+    "/:id/details.pdf",
+    {
+      preHandler: [app.authenticate],
+      schema: {
+        params: bookIdSchema,
+      },
+    },
+    exportBookPdf,
+  );
+  app.get(
     "/:id/cover",
     {
       schema: {
+        preHandler: [app.authenticate],
         params: bookIdSchema,
       },
     },
@@ -42,7 +74,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
   app.post(
     "/",
     {
-      preHandler: [app.authenticate],
+      preHandler: [app.authenticate, authorize],
     },
     addBook,
   );
@@ -65,5 +97,12 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
       },
     },
     deleteBookById,
+  );
+  app.post(
+    "/bulk",
+    {
+      preHandler: [app.authenticate],
+    },
+    addBookBulk,
   );
 };

@@ -1,8 +1,6 @@
-import { z } from "zod";
-
 export type dbErrorType = {
-  code: string;
-  meta: {
+  code?: string;
+  meta?: {
     modelName: string;
     driverAdapterError: {
       name: string;
@@ -16,6 +14,7 @@ export type dbErrorType = {
       };
     };
   };
-  clientVersion: string;
-  name: string;
+  clientVersion?: string;
+  name?: string;
+  message?: string;
 };

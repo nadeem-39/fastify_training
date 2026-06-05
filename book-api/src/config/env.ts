@@ -21,6 +21,9 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string(),
   SMTP_USER: z.email(),
   SMTP_PASS: z.string(),
+  IS_ADMIN: z.string(),
+  KLAVIYO_LIST_ID: z.string(),
+  KLAVIYO_PRIVATE_KEY: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

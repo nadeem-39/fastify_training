@@ -12,6 +12,7 @@ import {
   type userRegisterSchemaType,
 } from "../schemas/user.js";
 import { sendEmail } from "../lib/mailer.js";
+import { ZodError } from "zod";
 
 // login user
 export async function login(req: FastifyRequest, reply: FastifyReply) {
@@ -46,6 +47,11 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
       message: "Login successfully",
     });
   } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        message: error.issues[0].message,
+      });
+    }
     const err = error as dbErrorType;
     return reply.status(400).send({
       success: false,
@@ -72,6 +78,11 @@ export async function register(req: FastifyRequest, reply: FastifyReply) {
       message: "Register Successfully",
     });
   } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        message: error.issues[0].message,
+      });
+    }
     const err = error as dbErrorType;
     return reply.status(400).send({
       success: false,
@@ -96,7 +107,7 @@ export async function authMe(req: FastifyRequest, reply: FastifyReply) {
     const err = error as dbErrorType;
     return reply.status(400).send({
       success: false,
-      message: err.meta.driverAdapterError.cause.originalMessage,
+      message: err?.meta?.driverAdapterError.cause.originalMessage,
     });
   }
 }
@@ -148,10 +159,15 @@ export async function userForgotPassEmail(
       message: "If the email exists, a reset link has been sent.",
     });
   } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        message: error.issues[0].message,
+      });
+    }
     const err = error as dbErrorType;
     return reply.status(400).send({
       success: false,
-      message: err.meta.driverAdapterError.cause.originalMessage,
+      message: err?.meta?.driverAdapterError?.cause?.originalMessage,
     });
   }
 }
@@ -195,10 +211,15 @@ export async function resetPassword(req: FastifyRequest, reply: FastifyReply) {
       message: "Successfully reset password",
     });
   } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        message: error.issues[0].message,
+      });
+    }
     const err = error as dbErrorType;
     return reply.status(400).send({
       success: false,
-      message: err.meta.driverAdapterError.cause.originalMessage,
+      message: err.meta?.driverAdapterError.cause.originalMessage,
     });
   }
 }

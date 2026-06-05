@@ -21,6 +21,7 @@ CREATE TABLE `User` (
     `email` VARCHAR(255) NOT NULL,
     `username` VARCHAR(45) NOT NULL,
     `passwordHash` VARCHAR(255) NOT NULL,
+    `role` VARCHAR(10) NOT NULL DEFAULT 'ADMIN',
     `googleId` VARCHAR(64) NULL,
     `resetToken` VARCHAR(64) NULL,
     `resetExpires` DATETIME(3) NULL,

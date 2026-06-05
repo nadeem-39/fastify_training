@@ -31,12 +31,16 @@ import fastifyJwt from "@fastify/jwt";
 
 import { booksRoutes } from "./routes/books.js";
 import { authRoutes } from "./routes/auth.js";
+import { studentRoutes } from "./routes/students.js";
+import { issueRoutes } from "./routes/issue.js";
 
 // cors for browser
 await app.register(cors, {
   origin: ["http://127.0.0.1:5173", "http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  // credentials: true,
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Content-Disposition"],
 });
 
 // adding form data parser
@@ -67,8 +71,14 @@ app.get("/health", async () => ({ status: "ok" }));
 // book routes
 app.register(booksRoutes, { prefix: "/books" });
 
+// student routes
+app.register(studentRoutes, { prefix: "/students" });
+
 //auth routes
 app.register(authRoutes, { prefix: "/auth" });
+
+// issue routes
+app.register(issueRoutes, { prefix: "/issues" });
 
 // error handler
 app.setErrorHandler((err: any, req, reply) => {

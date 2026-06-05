@@ -8,15 +8,15 @@ import { prisma } from "../lib/prisma.js";
 import { dbErrorType } from "../schemas/Error.js";
 import { type paginationQueryType } from "../schemas/query.js";
 import {
+  createStudentSchema,
   CreateStudentSchemaType,
   type StudentIdSchemaType,
 } from "../schemas/student.js";
-import { type BookIdSchema, CreateBookSchema } from "../schemas/book.js";
-import { sendEmail } from "../lib/mailer.js";
-import { reqUserSchemaType } from "../schemas/reqUserSchema.js";
+
 import { fileValidation } from "../lib/fileValidation.js";
 
 import { deleteFile } from "../lib/deleteFile.js";
+import { ZodError } from "zod";
 
 // get all students
 export async function getStudents(req: FastifyRequest, reply: FastifyReply) {
@@ -24,10 +24,22 @@ export async function getStudents(req: FastifyRequest, reply: FastifyReply) {
     let queries = req.query as paginationQueryType;
 
     // create where command for db execution.
+    console.log(queries);
+
     const where = queries.search
       ? {
-          name: { contains: queries.search },
-          rollNo: { contains: queries.search },
+          OR: [
+            {
+              name: {
+                contains: queries.search,
+              },
+            },
+            {
+              rollNo: {
+                contains: queries.search,
+              },
+            },
+          ],
         }
       : {};
 
@@ -99,7 +111,7 @@ export async function addStudent(req: FastifyRequest, reply: FastifyReply) {
       country?: string;
       state?: string;
       city?: string;
-      photo?: string;
+      photoFile?: string;
     } = {};
 
     for await (const part of parts) {
@@ -142,10 +154,11 @@ export async function addStudent(req: FastifyRequest, reply: FastifyReply) {
 
         await pipeline(part.file, fs.createWriteStream(relativePath));
 
-        studentInfo.photo = fileName;
+        studentInfo.photoFile = fileName;
       }
     }
-    let studentData = studentInfo as CreateStudentSchemaType;
+
+    let studentData = createStudentSchema.parse(studentInfo);
 
     let data = await prisma.student.create({
       data: studentData,
@@ -157,7 +170,14 @@ export async function addStudent(req: FastifyRequest, reply: FastifyReply) {
       message: "Added Successfully",
     });
   } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        message: error.issues[0].message,
+      });
+    }
     const err = error as dbErrorType;
+    console.log(error);
+
     return reply.status(400).send({
       success: false,
       message:
@@ -167,75 +187,80 @@ export async function addStudent(req: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-// edit book by id
-export async function editBook(req: FastifyRequest, reply: FastifyReply) {
+// edit student by id
+export async function editStudent(req: FastifyRequest, reply: FastifyReply) {
   try {
     const parts = req.parts();
-
     const studentInfo: {
-      bookName?: string;
-      authorName?: string;
-      isbn?: string;
-      coverFile?: string;
+      name?: string;
+      rollNo?: string;
+      phoneNo?: string;
+      country?: string;
+      state?: string;
+      city?: string;
+      photoFile?: string;
     } = {};
 
     for await (const part of parts) {
       if (part.type === "field") {
         switch (part.fieldname) {
-          case "bookName":
-            studentInfo.bookName = part.value as string;
+          case "name":
+            studentInfo.name = part.value as string;
             break;
 
-          case "authorName":
-            studentInfo.authorName = part.value as string;
+          case "rollNo":
+            studentInfo.rollNo = part.value as string;
             break;
 
-          case "isbn":
-            studentInfo.isbn = part.value as string;
+          case "phoneNo":
+            studentInfo.phoneNo = part.value as string;
+            break;
+          case "country":
+            studentInfo.country = part.value as string;
+            break;
+          case "state":
+            studentInfo.state = part.value as string;
+            break;
+          case "city":
+            studentInfo.city = part.value as string;
             break;
         }
       }
 
       if (part.type === "file") {
         if (!fileValidation(part))
-          return reply
-            .code(400)
-            .send({ success: false, message: "Invalid file (jpeg/png only)" });
+          return reply.code(400).send({
+            success: false,
+            message: "Invalid file (jpg/jpeg/png only)",
+          });
         const ext = path.extname(part.filename ?? "");
 
         const fileName = `${uuidv4()}${ext}`;
 
-        const relativePath = `uploads/books/${fileName}`;
+        const relativePath = `uploads/students/${fileName}`;
 
         await pipeline(part.file, fs.createWriteStream(relativePath));
 
-        studentInfo.coverFile = fileName;
+        studentInfo.photoFile = fileName;
       }
     }
-    let content = `
-      Book Name: ${studentInfo.bookName}
-      Author: ${studentInfo.authorName}
-      ISBN: ${studentInfo.isbn}
-      `;
-    let user = req.user as reqUserSchemaType;
-    await sendEmail(user.email, "Successfully book edited", content);
-    // console.log(req.user, " --------------------------------------------");
 
-    let params = req.params as BookIdSchema;
-    let bookData = studentInfo as CreateBookSchema;
-    let oldBookData = await prisma.book.findUnique({
+    let params = req.params as StudentIdSchemaType;
+    let studentData = createStudentSchema.parse(studentInfo);
+    let oldStudentData = await prisma.student.findUnique({
       where: {
         id: params.id,
       },
     });
-    if (oldBookData && oldBookData.coverFile)
-      deleteFile(`uploads/books/${oldBookData?.coverFile}`);
 
-    let data = await prisma.book.update({
+    if (oldStudentData && oldStudentData.photoFile)
+      deleteFile(`uploads/students/${oldStudentData?.photoFile}`);
+
+    let data = await prisma.student.update({
       where: {
         id: params.id,
       },
-      data: bookData,
+      data: studentData,
     });
 
     return reply.status(200).send({
@@ -244,6 +269,11 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
       message: "Edit Successfully",
     });
   } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        message: error.issues[0].message,
+      });
+    }
     const err = error as dbErrorType;
     console.log(error);
 
@@ -256,31 +286,35 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-// delete book by id
-export async function deleteBookById(req: FastifyRequest, reply: FastifyReply) {
+// delete student by id
+export async function deleteStudentById(
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
   try {
-    let params = req.params as BookIdSchema;
-    let oldBookData = await prisma.book.findUnique({
+    let params = req.params as StudentIdSchemaType;
+    let oldStudentData = await prisma.student.findUnique({
       where: {
         id: params.id,
       },
     });
 
-    if (oldBookData && oldBookData.coverFile)
-      deleteFile(`uploads/books/${oldBookData?.coverFile}`);
+    if (oldStudentData && oldStudentData.photoFile)
+      deleteFile(`uploads/students/${oldStudentData?.photoFile}`);
 
-    let book = await prisma.book.delete({
+    let student = await prisma.student.delete({
       where: {
         id: params.id,
       },
     });
     return reply.status(200).send({
       success: true,
-      data: book,
+      data: student,
       message: "Delete successfully",
     });
   } catch (error: unknown) {
     const err = error as dbErrorType;
+    console.log(err);
     return reply.status(400).send({
       success: false,
       message:
@@ -291,18 +325,22 @@ export async function deleteBookById(req: FastifyRequest, reply: FastifyReply) {
 }
 
 // download file
-export async function getBookImage(req: FastifyRequest, reply: FastifyReply) {
-  let params = req.params as BookIdSchema;
-  const book = await prisma.book.findUnique({
+export async function getStudentImage(
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  let params = req.params as StudentIdSchemaType;
+  const student = await prisma.student.findUnique({
     where: { id: params.id },
   });
-  if (!book?.coverFile)
+  if (!student?.photoFile)
     return reply.code(404).send({ success: false, message: "Not found" });
-  const abs = `uploads/books/${book.coverFile}`;
+  const abs = `uploads/students/${student.photoFile}`;
+  console.log(abs, "------------------------------");
   if (!existsSync(abs))
     return reply.code(404).send({ success: false, message: "Missing" });
 
-  const safeName = `${book.bookName.replace(/[^\w.-]/g, "_")}${path.extname(abs)}`;
+  const safeName = `${student.name.replace(/[^\w.-]/g, "_")}${path.extname(abs)}`;
 
   reply.header("Content-Disposition", `attachment; filename="${safeName}"`);
   return reply.send(createReadStream(abs));

@@ -36,7 +36,7 @@ export const createStudentSchema = z.object({
     .string({ error: "Enter valid city name" })
     .min(1, "City is empty")
     .max(60, "city should be less than 60 characters"),
-  photo: z.string().optional(),
+  photoFile: z.string().optional(),
 });
 
 export type StudentIdSchemaType = z.infer<typeof studentIdSchema>;
