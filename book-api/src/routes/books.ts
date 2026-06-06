@@ -15,93 +15,95 @@ import {
   addBookBulk,
 } from "../controllers/books.js";
 import { authorize } from "../lib/authorization.js";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 export const booksRoutes: FastifyPluginAsync = async (app) => {
-  app.get(
+  const server = app.withTypeProvider<ZodTypeProvider>();
+  server.get(
     "/",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate],
       schema: { querystring: paginationQuery },
     },
     getBooks,
   );
-  app.get(
+  server.get(
     "/export.xlsx",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate],
       schema: { querystring: paginationQuery },
     },
     exportBooksExel,
   );
-  app.get(
+  server.get(
     "/export.csv",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate],
       schema: { querystring: paginationQuery },
     },
     exportBooksCsv,
   );
-  app.get(
+  server.get(
     "/:id",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate],
       schema: {
         params: bookIdSchema,
       },
     },
     getBookById,
   );
-  app.get(
+  server.get(
     "/:id/details.pdf",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate],
       schema: {
         params: bookIdSchema,
       },
     },
     exportBookPdf,
   );
-  app.get(
+  server.get(
     "/:id/cover",
     {
       schema: {
-        preHandler: [app.authenticate],
+        preHandler: [server.authenticate],
         params: bookIdSchema,
       },
     },
     getBookImage,
   );
-  app.post(
+  server.post(
     "/",
     {
-      preHandler: [app.authenticate, authorize],
+      preHandler: [server.authenticate, authorize],
     },
     addBook,
   );
-  app.put(
+  server.put(
     "/:id",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate, authorize],
       schema: {
         params: bookIdSchema,
       },
     },
     editBook,
   );
-  app.delete(
+  server.delete(
     "/:id",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate, authorize],
       schema: {
         params: bookIdSchema,
       },
     },
     deleteBookById,
   );
-  app.post(
+  server.post(
     "/bulk",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate],
     },
     addBookBulk,
   );

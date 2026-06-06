@@ -1,10 +1,10 @@
 import z from "zod";
 
 export const reqUserSchema = z.object({
-  email: z
-    .email({ error: "Need valid email" })
-    .min(1, "Email is empty")
-    .max(255, "Email should be less than 100 characters"),
+  id: z
+    .number({ error: "User id should be a number" })
+    .min(1, "Use valid user id"),
+
   role: z
     .string()
     .min(1, "Password is empty")

@@ -3,21 +3,25 @@ import { prisma } from "../lib/prisma.js";
 import { dbErrorType } from "../schemas/Error.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import app from "../server.js";
-
 import {
-  resetPasswordSchema,
-  userForgotPassEmailSchema,
   type userLoginSchemaType,
   type userRegisterSchemaType,
+  type resetPasswordSchemaType,
+  type userForgotPassEmailSchemaType,
 } from "../schemas/user.js";
 import { sendEmail } from "../lib/mailer.js";
 import { ZodError } from "zod";
+import { reqUserSchemaType } from "../schemas/reqUserSchema.js";
 
 // login user
-export async function login(req: FastifyRequest, reply: FastifyReply) {
+export async function login(
+  req: FastifyRequest<{
+    Body: userLoginSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
-    let userInfo = req.body as userLoginSchemaType;
+    let userInfo = req.body;
     let data = await prisma.user.findUnique({
       where: {
         email: userInfo.email,
@@ -30,9 +34,8 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
         message: "Invalid credentials",
         data,
       });
-
-    const token = app.jwt.sign(
-      { email: data.email, role: data.role },
+    const token = req.server.jwt.sign(
+      { id: data.id, role: data.role },
       { expiresIn: "7d" },
     );
 
@@ -62,10 +65,15 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
 
 // register me
 
-export async function register(req: FastifyRequest, reply: FastifyReply) {
+export async function register(
+  req: FastifyRequest<{
+    Body: userRegisterSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
     let { firstName, lastName, middleName, password, email, username } =
-      req.body as userRegisterSchemaType;
+      req.body;
     let passwordHash = await bcrypt.hash(password, 10);
 
     let data = await prisma.user.create({
@@ -96,8 +104,8 @@ export async function register(req: FastifyRequest, reply: FastifyReply) {
 // auth me
 export async function authMe(req: FastifyRequest, reply: FastifyReply) {
   try {
-    const userEmail = (req.user as { email: string; role: string }).email;
-    const user = await prisma.user.findUnique({ where: { email: userEmail } });
+    const userId = (req.user as reqUserSchemaType).id;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     return reply.status(201).send({
       success: true,
       user,
@@ -113,11 +121,13 @@ export async function authMe(req: FastifyRequest, reply: FastifyReply) {
 }
 
 export async function userForgotPassEmail(
-  req: FastifyRequest,
+  req: FastifyRequest<{
+    Body: userForgotPassEmailSchemaType;
+  }>,
   reply: FastifyReply,
 ) {
   try {
-    let userInfo = req.body as userForgotPassEmailSchema;
+    let userInfo = req.body;
     let data = await prisma.user.findUnique({
       where: {
         email: userInfo.email,
@@ -172,9 +182,14 @@ export async function userForgotPassEmail(
   }
 }
 
-export async function resetPassword(req: FastifyRequest, reply: FastifyReply) {
+export async function resetPassword(
+  req: FastifyRequest<{
+    Body: resetPasswordSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
-    const { token, password } = req.body as resetPasswordSchema;
+    const { token, password } = req.body;
     // console.log("Hiii-----------", token, password);
 
     const user = await prisma.user.findFirst({

@@ -10,7 +10,7 @@ import { prisma } from "../lib/prisma.js";
 import { dbErrorType } from "../schemas/Error.js";
 import { type paginationQueryType } from "../schemas/query.js";
 import ExcelJS from "exceljs";
-import { type BookIdSchema, createBookSchema } from "../schemas/book.js";
+import { type BookIdSchemaType, createBookSchema } from "../schemas/book.js";
 import { sendEmail } from "../lib/mailer.js";
 import { reqUserSchemaType } from "../schemas/reqUserSchema.js";
 import { fileValidation } from "../lib/fileValidation.js";
@@ -20,9 +20,14 @@ import { ZodError } from "zod";
 import { klaviyo } from "../lib/klaviyo.js";
 
 // get all books
-export async function getBooks(req: FastifyRequest, reply: FastifyReply) {
+export async function getBooks(
+  req: FastifyRequest<{
+    Querystring: paginationQueryType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
-    let queries = req.query as paginationQueryType;
+    let queries = req.query;
 
     // create where command for db execution.
     const where = queries.search
@@ -70,14 +75,25 @@ export async function getBooks(req: FastifyRequest, reply: FastifyReply) {
 }
 
 // get single book by id
-export async function getBookById(req: FastifyRequest, reply: FastifyReply) {
+export async function getBookById(
+  req: FastifyRequest<{
+    Params: BookIdSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
-    let params = req.params as BookIdSchema;
+    let params = req.params;
     let book = await prisma.book.findUnique({
       where: {
         id: params.id,
       },
     });
+    if (!book) {
+      return reply.status(404).send({
+        success: false,
+        message: "Book not found",
+      });
+    }
     return reply.status(200).send({
       success: true,
       data: book,
@@ -149,12 +165,12 @@ export async function addBook(req: FastifyRequest, reply: FastifyReply) {
       `;
     let user = req.user as reqUserSchemaType;
 
-    let admin = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { firstName: true, lastName: true },
+    let userInfo = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { firstName: true, lastName: true, email: true },
     });
 
-    await klaviyo(admin, bookData);
+    await klaviyo(userInfo, bookData);
 
     let data = await prisma.book.create({
       data: bookData,
@@ -166,7 +182,11 @@ export async function addBook(req: FastifyRequest, reply: FastifyReply) {
       },
       "Book created",
     );
-    await sendEmail(user.email, "Successfully book added", content);
+
+    // let userInfo = await prisma.user.findUnique({ where: { id: user.id } });
+
+    if (userInfo?.email)
+      await sendEmail(userInfo?.email, "Successfully book added", content);
     return reply.status(201).send({
       success: true,
       data,
@@ -191,7 +211,12 @@ export async function addBook(req: FastifyRequest, reply: FastifyReply) {
 }
 
 // edit book by id
-export async function editBook(req: FastifyRequest, reply: FastifyReply) {
+export async function editBook(
+  req: FastifyRequest<{
+    Params: BookIdSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
     const parts = req.parts();
 
@@ -237,7 +262,7 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
       }
     }
 
-    let params = req.params as BookIdSchema;
+    let params = req.params;
     const bookData = createBookSchema.parse(bookInfo);
     let content = `
       Book Name: ${bookInfo.bookName}
@@ -246,19 +271,27 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
       `;
 
     let user = req.user as reqUserSchemaType;
+    // console.log(user, "------------------------------------------------");
 
-    let admin = await prisma.user.findUnique({
-      where: { email: user.email },
+    let userInfo = await prisma.user.findUnique({
+      where: { id: user.id },
       select: { firstName: true, lastName: true, email: true },
     });
-    await klaviyo(admin, bookData);
+    await klaviyo(userInfo, bookData);
 
     let oldBookData = await prisma.book.findUnique({
       where: {
         id: params.id,
       },
     });
-    if (oldBookData && oldBookData.coverFile)
+    // console.log(bookData);
+    if (!oldBookData) {
+      return reply.status(404).send({
+        success: false,
+        message: "Book not found",
+      });
+    }
+    if (oldBookData && oldBookData.coverFile && bookData.coverFile)
       deleteFile(`uploads/books/${oldBookData?.coverFile}`);
 
     let data = await prisma.book.update({
@@ -267,7 +300,11 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
       },
       data: bookData,
     });
-    await sendEmail(user.email, "Successfully book edited", content);
+
+    // let userInfo = await prisma.user.findUnique({ where: { id: user.id } });
+
+    if (userInfo?.email)
+      await sendEmail(userInfo?.email, "Successfully book added", content);
     return reply.status(200).send({
       success: true,
       data,
@@ -292,9 +329,14 @@ export async function editBook(req: FastifyRequest, reply: FastifyReply) {
 }
 
 // delete book by id
-export async function deleteBookById(req: FastifyRequest, reply: FastifyReply) {
+export async function deleteBookById(
+  req: FastifyRequest<{
+    Params: BookIdSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
-    let params = req.params as BookIdSchema;
+    let params = req.params;
     let oldBookData = await prisma.book.findUnique({
       where: {
         id: params.id,
@@ -326,8 +368,13 @@ export async function deleteBookById(req: FastifyRequest, reply: FastifyReply) {
 }
 
 // download file
-export async function getBookImage(req: FastifyRequest, reply: FastifyReply) {
-  let params = req.params as BookIdSchema;
+export async function getBookImage(
+  req: FastifyRequest<{
+    Params: BookIdSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
+  let params = req.params;
   const book = await prisma.book.findUnique({
     where: { id: params.id },
   });
@@ -347,11 +394,13 @@ export async function getBookImage(req: FastifyRequest, reply: FastifyReply) {
 // export book excel file.
 
 export const exportBooksExel = async (
-  req: FastifyRequest,
+  req: FastifyRequest<{
+    Querystring: paginationQueryType;
+  }>,
   reply: FastifyReply,
 ) => {
   try {
-    let queries = req.query as paginationQueryType;
+    let queries = req.query;
 
     // create where command for db execution.
     const where = queries.search
@@ -401,11 +450,13 @@ export const exportBooksExel = async (
 
 // export book csv file
 export const exportBooksCsv = async (
-  req: FastifyRequest,
+  req: FastifyRequest<{
+    Querystring: paginationQueryType;
+  }>,
   reply: FastifyReply,
 ) => {
   try {
-    const queries = req.query as paginationQueryType;
+    const queries = req.query;
 
     // Create where condition for search
     const where = queries.search
@@ -449,11 +500,14 @@ export const exportBooksCsv = async (
 
 // eport book pdf file
 export const exportBookPdf = async (
-  req: FastifyRequest,
+  req: FastifyRequest<{
+    Params: BookIdSchemaType;
+  }>,
+
   reply: FastifyReply,
 ) => {
   try {
-    const { id } = req.params as BookIdSchema;
+    const { id } = req.params;
 
     const book = await prisma.book.findUnique({
       where: {
@@ -538,7 +592,8 @@ export const exportBookPdf = async (
 export const addBookBulk = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     const part = await req.file();
-    if (!part) return reply.code(400).send({ message: "No file" });
+    if (!part)
+      return reply.code(400).send({ status: false, message: "No file" });
 
     const text = (await part.toBuffer()).toString("utf8");
     const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
@@ -562,7 +617,7 @@ export const addBookBulk = async (req: FastifyRequest, reply: FastifyReply) => {
       data: valid,
       skipDuplicates: true,
     });
-    return reply.status(400).send({
+    return reply.status(200).send({
       success: true,
       data: { created: created.count, failed },
       message: "Ok",

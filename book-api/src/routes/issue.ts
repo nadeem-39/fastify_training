@@ -6,31 +6,33 @@ import { getIssues, createIssue, returnBook } from "../controllers/issue.js";
 import { bodyParser } from "../lib/bodyParser.js";
 import { createIssueSchema, issueIdSchema } from "../schemas/issue.js";
 import { authorize } from "../lib/authorization.js";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 export const issueRoutes: FastifyPluginAsync = async (app) => {
-  app.get(
+  const server = app.withTypeProvider<ZodTypeProvider>();
+  server.get(
     "/",
     {
-      preHandler: [app.authenticate],
+      preHandler: [server.authenticate],
       schema: { querystring: paginationQueryForIssue },
     },
     getIssues,
   );
 
-  app.post(
+  server.post(
     "/",
     {
-      preHandler: [app.authenticate, authorize],
+      preHandler: [server.authenticate, authorize],
       preValidation: bodyParser,
       schema: { body: createIssueSchema },
     },
     createIssue,
   );
 
-  app.patch(
+  server.patch(
     "/:id/return",
     {
-      preHandler: [app.authenticate, authorize],
+      preHandler: [server.authenticate, authorize],
       schema: { params: issueIdSchema },
     },
     returnBook,

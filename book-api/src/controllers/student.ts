@@ -84,6 +84,12 @@ export async function getStudentById(req: FastifyRequest, reply: FastifyReply) {
         id: params.id,
       },
     });
+    if (!student) {
+      return reply.status(404).send({
+        success: false,
+        message: "Book not found",
+      });
+    }
     return reply.status(200).send({
       success: true,
       data: student,
@@ -188,7 +194,12 @@ export async function addStudent(req: FastifyRequest, reply: FastifyReply) {
 }
 
 // edit student by id
-export async function editStudent(req: FastifyRequest, reply: FastifyReply) {
+export async function editStudent(
+  req: FastifyRequest<{
+    Params: StudentIdSchemaType;
+  }>,
+  reply: FastifyReply,
+) {
   try {
     const parts = req.parts();
     const studentInfo: {
@@ -245,7 +256,7 @@ export async function editStudent(req: FastifyRequest, reply: FastifyReply) {
       }
     }
 
-    let params = req.params as StudentIdSchemaType;
+    let params = req.params;
     let studentData = createStudentSchema.parse(studentInfo);
     let oldStudentData = await prisma.student.findUnique({
       where: {
@@ -253,7 +264,14 @@ export async function editStudent(req: FastifyRequest, reply: FastifyReply) {
       },
     });
 
-    if (oldStudentData && oldStudentData.photoFile)
+    if (!oldStudentData) {
+      return reply.status(404).send({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    if (oldStudentData && oldStudentData.photoFile && studentData.photoFile)
       deleteFile(`uploads/students/${oldStudentData?.photoFile}`);
 
     let data = await prisma.student.update({
@@ -288,11 +306,13 @@ export async function editStudent(req: FastifyRequest, reply: FastifyReply) {
 
 // delete student by id
 export async function deleteStudentById(
-  req: FastifyRequest,
+  req: FastifyRequest<{
+    Params: StudentIdSchemaType;
+  }>,
   reply: FastifyReply,
 ) {
   try {
-    let params = req.params as StudentIdSchemaType;
+    let params = req.params;
     let oldStudentData = await prisma.student.findUnique({
       where: {
         id: params.id,

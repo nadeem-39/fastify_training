@@ -19,8 +19,8 @@ export const createBookSchema = z.object({
   isbn: z
     .string({ error: "Enter valid isbn" })
     .regex(/^[0-9]{10}([0-9]{3})?$/, "Wrong ISBN"),
-  coverFile: z.string().optional().default(""),
+  coverFile: z.string().optional(),
 });
 
-export type BookIdSchema = z.infer<typeof bookIdSchema>;
+export type BookIdSchemaType = z.infer<typeof bookIdSchema>;
 export type CreateBookSchemaType = z.infer<typeof createBookSchema>;

@@ -33,6 +33,7 @@ import { booksRoutes } from "./routes/books.js";
 import { authRoutes } from "./routes/auth.js";
 import { studentRoutes } from "./routes/students.js";
 import { issueRoutes } from "./routes/issue.js";
+import { ZodError } from "zod";
 
 // cors for browser
 await app.register(cors, {
@@ -82,6 +83,13 @@ app.register(issueRoutes, { prefix: "/issues" });
 
 // error handler
 app.setErrorHandler((err: any, req, reply) => {
+  // console.log();
+  if (err?.message?.substring(0, 5) == "body/") {
+    let message = err.message.split(",")[0].split(" ").slice(1).join(" ");
+    return reply.status(400).send({
+      message: message,
+    });
+  }
   req.log.error({ err }, "unhandled error");
   reply.status(err.statusCode || 500).send({
     success: false,

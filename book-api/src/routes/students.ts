@@ -12,9 +12,11 @@ import {
 } from "../controllers/student.js";
 import { studentIdSchema } from "../schemas/student.js";
 import { authorize } from "../lib/authorization.js";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 export const studentRoutes: FastifyPluginAsync = async (app) => {
-  app.get(
+  const server = app.withTypeProvider<ZodTypeProvider>();
+  server.get(
     "/",
     {
       preHandler: [app.authenticate],
@@ -22,7 +24,7 @@ export const studentRoutes: FastifyPluginAsync = async (app) => {
     },
     getStudents,
   );
-  app.get(
+  server.get(
     "/:id",
     {
       preHandler: [app.authenticate],
@@ -32,7 +34,7 @@ export const studentRoutes: FastifyPluginAsync = async (app) => {
     },
     getStudentById,
   );
-  app.get(
+  server.get(
     "/:id/photo",
     {
       schema: {
@@ -41,14 +43,14 @@ export const studentRoutes: FastifyPluginAsync = async (app) => {
     },
     getStudentImage,
   );
-  app.post(
+  server.post(
     "/",
     {
       preHandler: [app.authenticate, authorize],
     },
     addStudent,
   );
-  app.put(
+  server.put(
     "/:id",
     {
       preHandler: [app.authenticate, authorize],
@@ -58,7 +60,7 @@ export const studentRoutes: FastifyPluginAsync = async (app) => {
     },
     editStudent,
   );
-  app.delete(
+  server.delete(
     "/:id",
     {
       preHandler: [app.authenticate, authorize],

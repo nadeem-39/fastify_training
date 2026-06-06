@@ -8,9 +8,14 @@ import { paginationQueryForIssueType } from "../schemas/query.js";
 import { CreateIssueSchemaType, issueIdSchemaType } from "../schemas/issue.js";
 import { ZodError } from "zod";
 
-export const getIssues = async (req: FastifyRequest, reply: FastifyReply) => {
+export const getIssues = async (
+  req: FastifyRequest<{
+    Querystring: paginationQueryForIssueType;
+  }>,
+  reply: FastifyReply,
+) => {
   try {
-    let queries = req.query as paginationQueryForIssueType;
+    let queries = req.query;
 
     const where =
       queries.status === "ALL"
@@ -70,9 +75,14 @@ export const getIssues = async (req: FastifyRequest, reply: FastifyReply) => {
   }
 };
 
-export const createIssue = async (req: FastifyRequest, reply: FastifyReply) => {
+export const createIssue = async (
+  req: FastifyRequest<{
+    Body: CreateIssueSchemaType;
+  }>,
+  reply: FastifyReply,
+) => {
   try {
-    let issueData = req.body as CreateIssueSchemaType;
+    let issueData = req.body;
     const book = await prisma.book.findUnique({
       where: { id: issueData.bookId },
     });
@@ -132,9 +142,14 @@ export const createIssue = async (req: FastifyRequest, reply: FastifyReply) => {
   }
 };
 
-export const returnBook = async (req: FastifyRequest, reply: FastifyReply) => {
+export const returnBook = async (
+  req: FastifyRequest<{
+    Params: issueIdSchemaType;
+  }>,
+  reply: FastifyReply,
+) => {
   try {
-    const { id } = req.params as issueIdSchemaType;
+    const { id } = req.params;
 
     const issue = await prisma.issue.findUnique({
       where: { id: Number(id) },

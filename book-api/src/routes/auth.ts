@@ -13,31 +13,29 @@ import {
   userForgotPassEmail,
 } from "../controllers/auth.js";
 import { bodyParser } from "../lib/bodyParser.js";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 export const authRoutes: FastifyPluginAsync = async (app) => {
-  app.post(
+  const server = app.withTypeProvider<ZodTypeProvider>();
+  server.post(
     "/register",
     { preValidation: bodyParser, schema: { body: userRegisterSchema } },
     register,
   );
-  app.post(
+  server.post(
     "/login",
     { preValidation: bodyParser, schema: { body: userLoginSchema } },
     login,
   );
-  app.post(
+  server.post(
     "/forgot-password",
     { preValidation: bodyParser, schema: { body: userForgotPassEmailSchema } },
     userForgotPassEmail,
   );
-  app.post(
+  server.post(
     "/reset-password",
     { preValidation: bodyParser, schema: { body: resetPasswordSchema } },
     resetPassword,
   );
-  app.get("/me", { preHandler: [app.authenticate] }, authMe);
-
-  //   app.post("/register", { preValidation: bodyParser }, async (req, res) => {
-  //     console.log(req.body);
-  //   });
+  server.get("/me", { preHandler: [server.authenticate] }, authMe);
 };

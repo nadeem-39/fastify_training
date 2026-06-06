@@ -40,7 +40,7 @@ export const userRegisterSchema = z.object({
 
   password: z
     .string({ error: "Enter valid password" })
-    .min(8, "Password is empty")
+    .min(8, "Password should be greater than 8 characters")
     .max(64, "Password should be less than 100 characters"),
 });
 
@@ -58,7 +58,7 @@ export const resetPasswordSchema = z.object({
 
 export type userRegisterSchemaType = z.infer<typeof userRegisterSchema>;
 export type userLoginSchemaType = z.infer<typeof userLoginSchema>;
-export type userForgotPassEmailSchema = z.infer<
+export type userForgotPassEmailSchemaType = z.infer<
   typeof userForgotPassEmailSchema
 >;
-export type resetPasswordSchema = z.infer<typeof resetPasswordSchema>;
+export type resetPasswordSchemaType = z.infer<typeof resetPasswordSchema>;
